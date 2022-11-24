@@ -1,9 +1,10 @@
-const movie = require('../model/movie');
+const Movie = require('../model/movie');
 
 module.exports.index = (req, res, next) => {
-    movie.findAll().then(movies => {
+    Movie.findAll().then(movies => {
         res.render('movie-index', {
-            data: movies
+            data: movies,
+            identity: req.identity.user
         });
     })
 }
@@ -13,23 +14,23 @@ module.exports.create = (req, res, next) => {
 }
 
 module.exports.createPost = (req, res, next) => {
-    movie.create({
+    Movie.create({
             name: req.body.name,
             releaseDate: req.body.releasedate,
             summary: req.body.summary,
             director: req.body.director
         })
-        .then(user => {
+        .then(movieFromDb => {
             res.redirect("/");
         })
 }
 
-module.exports.update = (req, res, next) => {
-    movie.findByPk(req.params.id)
-        .then(user => {
+module.exports.update = async(req, res, next) => {
+    Movie.findByPk(req.params.id)
+        .then(movieFromDb => {
             res.render('movie-update', {
-                data: user
-            })
+                data: movieFromDb
+            });
         });
 }
 
@@ -52,8 +53,8 @@ module.exports.update = (req, res, next) => {
 //         });
 // }
 module.exports.updatePost = async (req, res, next) => {
-    var user = await movie.findByPk(req.params.id);
-    await movie.update(
+    // var movie = await movie.findByPk(req.params.id);
+    await Movie.update(
         {
             name: req.body.name,
             releaseDate: req.body.releasedate,
@@ -69,9 +70,9 @@ module.exports.updatePost = async (req, res, next) => {
 
 module.exports.delete = async (req, res, next) => {
     let id = req.params.id;
-    let user = await movie.findByPk(id);
-    if (user) {
-        await movie.destroy({
+    let movieFromDb = await Movie.findByPk(id);
+    if (movieFromDb != null) {
+        await Movie.destroy({
             where: {
                 id: id
             }

@@ -1,5 +1,4 @@
-const user = require('../model/user');
-const { body, validationResult } = require('express-validator');
+const User = require('../model/user');
 
 module.exports.login = (req, res, next)=>{
     res.render('login');
@@ -7,15 +6,16 @@ module.exports.login = (req, res, next)=>{
 
 module.exports.loginPost = async (req, res, next)=>{
     const {email, password} = req.body;
-    const userFromDb = await user.findOne({
+    const userFromDb = await User.findOne({
         where: {email: email, password: password}
     });
     
     if(userFromDb == null){
-        res.render('login', {message: 'No user with this email or password was found.'})
+        return res.render('login', {message: 'No user with this email or password was found.'})
     }
 
-    res.render('login');
+    req.session.userId = userFromDb.id;
+    res.redirect('/');
 }
 
 module.exports.register = (req, res, next)=>{
@@ -24,7 +24,7 @@ module.exports.register = (req, res, next)=>{
 
 module.exports.registerPost = async (req, res, next)=>{
     const {firstName, lastName, email, password } = req.body;
-    let existingUser = await user.findOne({
+    let existingUser = await User.findOne({
         where: {
             email: email
         }
@@ -34,7 +34,7 @@ module.exports.registerPost = async (req, res, next)=>{
         return res.render('register', {message: 'Already registered.'});
     }
 
-    await user.create({
+    await User.create({
         firstName: firstName,
         lastName: lastName,
         email: email,
