@@ -1,5 +1,6 @@
 const sequelize = require('./db');
 const {DataTypes} = require('sequelize');
+const Review = require('./review');
 
 const Movie = sequelize.define('Movie', {
     id: {
@@ -25,4 +26,5 @@ const Movie = sequelize.define('Movie', {
     }
 });
 
+// Movie.hasMany(Review)
 module.exports = Movie;
